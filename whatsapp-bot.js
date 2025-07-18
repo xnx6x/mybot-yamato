@@ -447,7 +447,7 @@ function createExampleCommands() {
     ok('Created enhanced commands: help, ping, info, stats, restart');
 }
 
-// Enhanced command loader with better error handling
+// Enhanced command loader with subdirectory support and better error handling
 async function loadCommands() {
     commandsMap.clear();
     
@@ -456,12 +456,33 @@ async function loadCommands() {
         return;
     }
     
-    const commandFiles = fs.readdirSync(commandsDir).filter(file => file.endsWith('.js'));
-    
-    for (const file of commandFiles) {
+    // Function to recursively get all .js files from directory and subdirectories
+    const getAllJsFiles = (dir) => {
+        let files = [];
         try {
-            const filePath = path.join(process.cwd(), commandsDir, file);
+            const items = fs.readdirSync(dir);
             
+            for (const item of items) {
+                const fullPath = path.join(dir, item);
+                const stat = fs.statSync(fullPath);
+                
+                if (stat.isDirectory()) {
+                    // Recursively search subdirectories
+                    files = files.concat(getAllJsFiles(fullPath));
+                } else if (item.endsWith('.js')) {
+                    files.push(fullPath);
+                }
+            }
+        } catch (error) {
+            err(`Error reading directory ${dir}: ${error.message}`);
+        }
+        return files;
+    };
+    
+    const commandFiles = getAllJsFiles(commandsDir);
+    
+    for (const filePath of commandFiles) {
+        try {
             // Enhanced cache busting for ES modules
             const fileUrl = `file://${filePath}?t=${Date.now()}&r=${Math.random()}`;
             
@@ -469,13 +490,13 @@ async function loadCommands() {
             const cmd = command.default;
             
             if (!cmd || !cmd.name || !cmd.execute) {
-                err(`Command ${file} is missing required properties (name, execute)`);
+                err(`Command ${path.basename(filePath)} is missing required properties (name, execute)`);
                 continue;
             }
             
             // Validate command structure
             if (typeof cmd.execute !== 'function') {
-                err(`Command ${file}: execute must be a function`);
+                err(`Command ${path.basename(filePath)}: execute must be a function`);
                 continue;
             }
             
@@ -490,13 +511,13 @@ async function loadCommands() {
                 }
             }
             
-            log(`Loaded command: ${cmd.name}${cmd.aliases ? ` (aliases: ${cmd.aliases.join(', ')})` : ''}`);
+            log(`Loaded command: ${cmd.name}${cmd.aliases ? ` (aliases: ${cmd.aliases.join(', ')})` : ''} from ${path.relative(commandsDir, filePath)}`);
         } catch (error) {
-            err(`Failed to load command ${file}: ${error.message}`);
+            err(`Failed to load command ${path.basename(filePath)}: ${error.message}`);
         }
     }
     
-    ok(`Loaded ${commandsMap.size} commands successfully`);
+    ok(`Loaded ${commandsMap.size} commands successfully from directories`);
 }
 
 // Enhanced command file watcher
