@@ -1,0 +1,55 @@
+{
+  "name": "yamato-whatsapp-bot",
+  "version": "3.0.0",
+  "description": "Enhanced WhatsApp bot with AI integration, improved stability and connection management",
+  "main": "whatsapp-bot.js",
+  "type": "module",
+  "scripts": {
+    "start": "node whatsapp-bot.js",
+    "dev": "node --watch whatsapp-bot.js",
+    "clean": "rm -rf auth_info_bot users.json stickers_webp commands/*.js",
+    "reset": "npm run clean && npm start",
+    "health": "curl -s http://localhost:3000/health | jq .",
+    "status": "curl -s http://localhost:3000/ | jq .",
+    "logs": "tail -f *.log",
+    "install-deps": "npm install --production",
+    "test-connection": "node -e \"console.log('Testing environment...'); import('./whatsapp-bot.js')\""
+  },
+  "keywords": [
+    "whatsapp",
+    "bot",
+    "ai",
+    "chatbot",
+    "baileys",
+    "groq",
+    "yamato",
+    "onepiece"
+  ],
+  "author": "Ray",
+  "license": "MIT",
+  "dependencies": {
+    "@whiskeysockets/baileys": "^6.7.5",
+    "chalk": "^5.3.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.18.3",
+    "groq-sdk": "^0.3.3",
+    "lowdb": "^7.0.1",
+    "pino": "^8.19.0",
+    "qrcode": "^1.5.3",
+    "wa-sticker-formatter": "^4.4.4"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/yamato-whatsapp-bot.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/yamato-whatsapp-bot/issues"
+  },
+  "homepage": "https://github.com/your-username/yamato-whatsapp-bot#readme"
+}
